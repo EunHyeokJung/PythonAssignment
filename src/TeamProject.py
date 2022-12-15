@@ -10,16 +10,16 @@ import pandas as pd
 import time
 import os
 import pick
+import sys, re
+import ctypes
+from ctypes import wintypes
 
 
-# TODO 0 : printns(str) = print(str); save(str)
-    # ㄴ 출력 내용 저장 후 기록보기 했을 때 출력하도록 함
-            # arr.append(args)
-# TODO 1 : Option 기록보기(idx: 3) => show recent data
-    # Shutdown curses from module pick(arrowOption())
-# TODO 2 : 시 / 군 / 구 선택 가능하도록 변경
+
+
+# TODO 1 : 시 / 군 / 구 선택 가능하도록 변경
     # ㄴ 시 선택 이후 title=city + "/"
-# TODO 3 : 직접 입력 / 선택 function화
+# TODO 2 : 직접 입력 / 선택 function화
 
 
 
@@ -27,7 +27,7 @@ import pick
 matplotlib.rcParams['font.family'] = 'Malgun Gothic'
 
 # DO NOT TOUCH
-data_path = '../소상공인시장진흥공단_상가(상권)정보_경기_202209.csv'
+data_path = 'C:/Users/gram/Desktop/Temp/Python project/소상공인시장진흥공단_상가(상권)정보_경기_202209.csv'
 city_list = []
 industry_list = []
 
@@ -95,13 +95,44 @@ for industry in industry_list:
 time.sleep(0.5)
 os.system("cls")
 
-print("< 지역 상권 분석 프로그램 >")
+print("< 지역 상권 분석 프로그램 >\n\n")
+
+
+def cursorPos():
+    OldStdinMode = ctypes.wintypes.DWORD()
+    OldStdoutMode = ctypes.wintypes.DWORD()
+    kernel32 = ctypes.windll.kernel32
+    kernel32.GetConsoleMode(kernel32.GetStdHandle(-10), ctypes.byref(OldStdinMode))
+    kernel32.SetConsoleMode(kernel32.GetStdHandle(-10), 0)
+    kernel32.GetConsoleMode(kernel32.GetStdHandle(-11), ctypes.byref(OldStdoutMode))
+    kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
+    try:
+        _ = ""
+        sys.stdout.write("\x1b[6n")
+        sys.stdout.flush()
+        while not (_ := _ + sys.stdin.read(1)).endswith('R'):
+            True
+        res = re.match(r".*\[(?P<y>\d*);(?P<x>\d*)R", _)
+    finally:
+        kernel32.SetConsoleMode(kernel32.GetStdHandle(-10), OldStdinMode)
+        kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), OldStdoutMode)
+    if(res):
+        return (res.group("x"), res.group("y"))
+    return (-1, -1)
+
+def moveCursor(x, y):
+    print("\033[%d;%dH" % (y, x))
 
 def realMain():
-    print("아무키를 눌러 옵션으로 이동\nq: 나가기")
+    print("[Enter] 키를 눌러 옵션으로 이동", end="")
     re = input()
     if re != 'q':
+        x, y = cursorPos()
+        moveCursor(0, int(y)-2)
+        print("\r", end="")
+        print(" "*30, "\r", end="")
         Main()
+    print('프로그램을 종료합니다.')
     exit()
 
 # 메인 스크린
@@ -177,7 +208,7 @@ def showCircleGraph(columns, column1, column2, re_row1, re_row2, title, options)
 # 지역별 업종 순위 입력
 def print_Industry_ranking():
     option = ["직접입력", "선택", "뒤로가기"]
-    option, index = arrowOption(option, "옵션")
+    option, index = arrowOption(option, "지역별 업종 순위")
     city = ""
     if index == 0:
         city = input("확인하고자 하는 지역을 입력하세요: ")
@@ -211,7 +242,7 @@ def Industry_ranking(city):
 # 업종별 지역 순위 입력
 def print_area_ranking_by_Industry():
     option = ["직접입력", "선택", "뒤로가기"]
-    option, index = arrowOption(option, "옵션")
+    option, index = arrowOption(option, "업종별 지역 순위")
     industry = ""
     if index == 0:
         industry = input("확인하고자 하는 업종을 입력하세요: ")
