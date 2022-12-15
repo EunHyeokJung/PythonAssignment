@@ -12,6 +12,9 @@ import os
 import pick
 
 
+# TODO 0 : printns(str) = print(str); save(str)
+    # ㄴ 출력 내용 저장 후 기록보기 했을 때 출력하도록 함
+            # arr.append(args)
 # TODO 1 : Option 기록보기(idx: 3) => show recent data
     # Shutdown curses from module pick(arrowOption())
 # TODO 2 : 시 / 군 / 구 선택 가능하도록 변경
@@ -24,7 +27,7 @@ import pick
 matplotlib.rcParams['font.family'] = 'Malgun Gothic'
 
 # DO NOT TOUCH
-data_path = 'C:/Users/gram/Desktop/Temp/소상공인시장진흥공단_상가(상권)정보_경기_202209.csv'
+data_path = '../소상공인시장진흥공단_상가(상권)정보_경기_202209.csv'
 city_list = []
 industry_list = []
 
@@ -40,7 +43,7 @@ print("Loading File from " + data_path)
 
 # Using tqdm module for pandas
 tqdm.pandas()
-df = pd.concat([chunk for chunk in tqdm(pd.read_csv('C:/Users/gram/Desktop/Temp/소상공인시장진흥공단_상가(상권)정보_경기_202209.csv', chunksize=10000), unit=" 항목", desc="파일을 불러오는 중")])
+df = pd.concat([chunk for chunk in tqdm(pd.read_csv(data_path, chunksize=10000), unit=" 항목", desc="파일을 불러오는 중")])
 
 row, column = df.shape
 print("\n\n" + str(row) + "행 " + str(column) + "열 의 데이터를 불러왔습니다.")
@@ -92,11 +95,18 @@ for industry in industry_list:
 time.sleep(0.5)
 os.system("cls")
 
+print("< 지역 상권 분석 프로그램 >")
+
+def realMain():
+    print("아무키를 눌러 옵션으로 이동\nq: 나가기")
+    re = input()
+    if re != 'q':
+        Main()
+    exit()
 
 # 메인 스크린
 def Main():
-    opt, idx = arrowOption(["지역별 업종 순위\n", "업종별 지역 순위\n", "나가기", "기록보기"], "< 옵션 선택 >")
-    print(idx, opt)
+    opt, idx = arrowOption(["업종별 지역 순위\n", "지역별 업종 순위\n", "나가기", "기록보기"], "< 옵션 선택 >")
     option(idx)
 
 def arrowOption(arr, title):
@@ -114,7 +124,7 @@ def option(num):
         print('프로그램을 종료합니다.')
         exit()
     elif num==3:
-        Main()
+        realMain()
     else:
         print("\n잘못된 입력입니다.")
         time.sleep(2)
@@ -126,6 +136,7 @@ def showCircleGraph(columns, column1, column2, re_row1, re_row2, title, options)
     if options:
         for idx, data in tqdm(enumerate(colList), unit="개", desc="전체 "+str(len(colList))+"개 중"):
             list.append(idx)
+        column1 = "전체"
     else:
         for idx, data in tqdm(enumerate(colList), unit="개",  desc="전체 "+str(len(colList))+"개 중"):
             if data == column1:
@@ -138,6 +149,7 @@ def showCircleGraph(columns, column1, column2, re_row1, re_row2, title, options)
         else:
             obj[category] = 1
     sortedObj = sorted(obj.items(), key=lambda x: x[1], reverse=True)
+    print(column1 + " 중 " + column2)
     print("---------------\n\t" + re_row1 + "\t\t" + re_row2)
     for cnt, category in enumerate(sortedObj):
         if cnt > 4:
@@ -146,7 +158,7 @@ def showCircleGraph(columns, column1, column2, re_row1, re_row2, title, options)
         if len(category[0]) <= 4:
             print("\t", end="")
         print("\t" + str(category[1]))
-    print("\n---------------")
+    print("\n---------------\n")
 
     ratio = []
     labels = []
