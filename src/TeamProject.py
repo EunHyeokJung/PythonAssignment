@@ -64,7 +64,7 @@ city_list = []
 industry_list = []
 
 # 콘솔 편집
-os.system("mode con cols=200 lines=50")
+os.system("mode con cols=150 lines=40")
 
 
 def load():
@@ -77,10 +77,14 @@ def load():
 
     global data_path
     global df
+    global city_list
+    global industry_list
     data_path = 'C:/Users/gram/Desktop/Temp/Python project/data/'
     # 불러올 파일 선택
     option, idx = arrowOption(data_list, "파일 선택")
     data_path += data_list[idx]
+    city_list = []
+    industry_list = []
 
     # Using tqdm module for pandas, Load file
     print("Loading File from " + data_path)
