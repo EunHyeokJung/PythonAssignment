@@ -2,21 +2,24 @@
     # ㄴ 시 선택 이후 title=city + "/"
 # TODO 2 : 직접 입력 / 선택 function화
 
-import string
-from colorama import Cursor
+# SYSTEMS
+import cmd
+import time, os, sys, re
+import ctypes
+
+# STYLE
+from pyfiglet import Figlet
+
+# ARROW OPTION (curses)
+import pick
+
+# DATA
+import pandas as pd
+from tqdm import tqdm
+
+# GRAPH
 import matplotlib.pyplot as plt
 import matplotlib
-from pyfiglet import Figlet
-import numpy as np
-from tqdm import tqdm
-from tqdm import trange
-import pandas as pd
-import time
-import os
-import pick
-import sys, re
-import ctypes
-from ctypes import wintypes
 
 
 def cursorPos():
@@ -44,12 +47,19 @@ def cursorPos():
 def moveCursor(x, y):
     print("\033[%d;%dH" % (y, x))
 
+def arrowOption(arr, title, multi=False):
+    _arr = [' '.join(list(v)) for v in arr]
+    _title = " ".join(list(title)).strip()
+    option, index = pick.pick(_arr, _title, indicator='>', default_index=0, multiselect=multi)
+    return option, index
 
 # 한글 사용 가능하도독 폰트 설정
 matplotlib.rcParams['font.family'] = 'Malgun Gothic'
 
 # DO NOT TOUCH
-data_path = 'C:/Users/gram/Desktop/Temp/Python project/소상공인시장진흥공단_상가(상권)정보_경기_202209.csv'
+global df
+data_path = 'C:/Users/gram/Desktop/Temp/Python project/data/'
+data_list = os.listdir(data_path)[1:]
 city_list = []
 industry_list = []
 
@@ -60,57 +70,66 @@ os.system("mode con cols=200 lines=50")
 f = Figlet(font='slant')
 print (f.renderText('Python Project'))
 
+time.sleep(1)
 
-# Using tqdm module for pandas, Load file
-print("Loading File from " + data_path)
-tqdm.pandas()
-df = pd.concat([chunk for chunk in tqdm(pd.read_csv(data_path, chunksize=10000), unit=" 항목", desc="파일을 불러오는 중")])
-row, column = df.shape
-print("\n\n" + str(row) + "행 " + str(column) + "열 의 데이터를 불러왔습니다.")
-df.head()
+# load
+def load():
+    global data_path
+    global df
+    # 불러올 파일 선택
+    option, idx = arrowOption(data_list, "파일 선택")
+    data_path += data_list[idx]
 
-time.sleep(0.5)
-os.system("cls")
+    # Using tqdm module for pandas, Load file
+    print("Loading File from " + data_path)
+    tqdm.pandas()
+    df = pd.concat([chunk for chunk in tqdm(pd.read_csv(data_path, chunksize=10000), unit=" 항목", desc="파일을 불러오는 중")])
+    row, column = df.shape
+    print("\n\n" + str(row) + "행 " + str(column) + "열 의 데이터를 불러왔습니다.")
+    df.head()
 
-print("\n\n시군구명 업데이트 중..\n")
-tem = list(set(df['시군구명'].tolist()))
-index = 0
-for city in tqdm(tem, unit="개"):
-    if not city_list or city > city_list[-1]:
-        city_list.append(city)
-    else:
-        while city > city_list[index] and len(city_list):
-            index += 1
-        city_list.insert(index, city)
-print("\n")
-for city in city_list:
-    print("-", city)
-time.sleep(0.5)
+    time.sleep(0.5)
+    os.system("cls")
 
-print("\n\n업종 종류 업데이트 중..\n")
-tem = list(set(df['상권업종대분류명'].tolist()))
-index = 0
-for industry in tqdm(tem, unit="개"):
-    if not industry_list or industry > industry_list[-1]:
-        industry_list.append(industry)
-    else:
-        while industry > industry_list[index] and len(industry_list):
-            index += 1
-        industry_list.insert(index, industry)
-print("\n")
-for industry in industry_list:
-    print("-", industry)
-time.sleep(0.5)
+    print("\n\n시군구명 업데이트 중..\n")
+    tem = list(set(df['시군구명'].tolist()))
+    index = 0
+    for city in tqdm(tem, unit="개"):
+        if not city_list or city > city_list[-1]:
+            city_list.append(city)
+        else:
+            while city > city_list[index] and len(city_list):
+                index += 1
+            city_list.insert(index, city)
+    print("\n")
+    for city in city_list:
+        print("-", city)
 
-os.system("cls")
+    time.sleep(0.5)
 
-print("< 지역 상권 분석 프로그램 >\n\n")
+    print("\n\n업종 종류 업데이트 중..\n")
+    tem = list(set(df['상권업종대분류명'].tolist()))
+    index = 0
+    for industry in tqdm(tem, unit="개"):
+        if not industry_list or industry > industry_list[-1]:
+            industry_list.append(industry)
+        else:
+            while industry > industry_list[index] and len(industry_list):
+                index += 1
+            industry_list.insert(index, industry)
+    print("\n")
+    for industry in industry_list:
+        print("-", industry)
 
-def arrowOption(arr, title):
-    _arr = [' '.join(list(v)) for v in arr]
-    _title = " ".join(list(title)).strip()
-    option, index = pick.pick(_arr, _title, indicator='>', default_index=0)
-    return option, index
+    time.sleep(0.5)
+
+    os.system("cls")
+
+    print("지역 상권 분석 프로그램 <%s>\n\n" % (data_list[idx].split("_")[2]))
+
+
+load()
+
 
 # # # # # SCREEN # # # # #
 # 메인 스크린
@@ -201,7 +220,7 @@ def print_Industry_ranking():
     if index == 0:
         city = input("확인하고자 하는 지역을 입력하세요: ")
     elif index == 1:
-        city_option = sorted(city_list[1:])
+        city_option = sorted(city_list[0:])
         city_option.insert(0, "뒤로가기")
         city_option.insert(1, "전체")
         cityName, index = arrowOption(city_option, "지역 선택")
