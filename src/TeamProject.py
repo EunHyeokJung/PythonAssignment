@@ -66,16 +66,18 @@ industry_list = []
 # 콘솔 편집
 os.system("mode con cols=200 lines=50")
 
-# PRINT FIGLET
-f = Figlet(font='slant')
-print (f.renderText('Python Project'))
 
-time.sleep(1)
-
-# load
 def load():
+
+    # PRINT FIGLET
+    f = Figlet(font='slant')
+    print (f.renderText('Python Project'))
+
+    time.sleep(1)
+
     global data_path
     global df
+    data_path = 'C:/Users/gram/Desktop/Temp/Python project/data/'
     # 불러올 파일 선택
     option, idx = arrowOption(data_list, "파일 선택")
     data_path += data_list[idx]
@@ -127,15 +129,14 @@ def load():
 
     print("지역 상권 분석 프로그램 <%s>\n\n" % (data_list[idx].split("_")[2]))
 
-
-load()
-
+    Main()
 
 # # # # # SCREEN # # # # #
 # 메인 스크린
 def Main():
-    opt, idx = arrowOption(["업종별 지역 순위\n", "지역별 업종 순위\n", "나가기", "기록보기"], "< 옵션 선택 >")
+    opt, idx = arrowOption(["업종별 지역 순위\n", "지역별 업종 순위\n", "나가기", "기록보기", "파일 변경"], "< 옵션 선택 >")
     option(idx)
+
 
 # 이전 기록
 def prevResult():
@@ -161,6 +162,11 @@ def option(num):
         exit()
     elif num==3:
         prevResult()
+    elif num==4:
+        print("파일 변경 페이지로 이동합니다.")
+        time.sleep(1)
+        os.system("cls")
+        load()
     else:
         print("\n잘못된 입력입니다.")
         time.sleep(2)
@@ -284,4 +290,5 @@ def area_ranking_by_Industry(industry):
     print_area_ranking_by_Industry()
 
 
-Main()
+# load
+load()
