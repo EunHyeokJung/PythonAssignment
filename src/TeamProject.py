@@ -1,3 +1,7 @@
+# TODO 1 : 시 / 군 / 구 선택 가능하도록 변경
+    # ㄴ 시 선택 이후 title=city + "/"
+# TODO 2 : 직접 입력 / 선택 function화
+
 import string
 from colorama import Cursor
 import matplotlib.pyplot as plt
@@ -13,89 +17,6 @@ import pick
 import sys, re
 import ctypes
 from ctypes import wintypes
-
-
-
-
-# TODO 1 : 시 / 군 / 구 선택 가능하도록 변경
-    # ㄴ 시 선택 이후 title=city + "/"
-# TODO 2 : 직접 입력 / 선택 function화
-
-
-
-# 한글 사용 가능하도독 폰트 설정
-matplotlib.rcParams['font.family'] = 'Malgun Gothic'
-
-# DO NOT TOUCH
-data_path = 'C:/Users/gram/Desktop/Temp/Python project/소상공인시장진흥공단_상가(상권)정보_경기_202209.csv'
-city_list = []
-industry_list = []
-
-# 콘솔 편집
-os.system("mode con cols=200 lines=50")
-
-# PRINT FIGLET
-f = Figlet(font='slant')
-print (f.renderText('Python Project'))
-
-# 파일 접근
-print("Loading File from " + data_path)
-
-# Using tqdm module for pandas
-tqdm.pandas()
-df = pd.concat([chunk for chunk in tqdm(pd.read_csv(data_path, chunksize=10000), unit=" 항목", desc="파일을 불러오는 중")])
-
-row, column = df.shape
-print("\n\n" + str(row) + "행 " + str(column) + "열 의 데이터를 불러왔습니다.")
-
-df.head()
-
-time.sleep(0.5)
-
-os.system("cls")
-
-print("\n\n시군구명 업데이트 중..\n")
-
-tem = list(set(df['시군구명'].tolist()))
-
-index = 0
-for city in tqdm(tem, unit="개"):
-    if not city_list or city > city_list[-1]:
-        city_list.append(city)
-    else:
-        while city > city_list[index] and len(city_list):
-            index += 1
-        city_list.insert(index, city)
-
-print("\n")
-
-for city in city_list:
-    print("-", city)
-
-time.sleep(0.5)
-
-print("\n\n업종 종류 업데이트 중..\n")
-
-tem = list(set(df['상권업종대분류명'].tolist()))
-
-index = 0
-for industry in tqdm(tem, unit="개"):
-    if not industry_list or industry > industry_list[-1]:
-        industry_list.append(industry)
-    else:
-        while industry > industry_list[index] and len(industry_list):
-            index += 1
-        industry_list.insert(index, industry)
-
-print("\n")
-
-for industry in industry_list:
-    print("-", industry)
-
-time.sleep(0.5)
-os.system("cls")
-
-print("< 지역 상권 분석 프로그램 >\n\n")
 
 
 def cursorPos():
@@ -123,7 +44,82 @@ def cursorPos():
 def moveCursor(x, y):
     print("\033[%d;%dH" % (y, x))
 
-def realMain():
+
+# 한글 사용 가능하도독 폰트 설정
+matplotlib.rcParams['font.family'] = 'Malgun Gothic'
+
+# DO NOT TOUCH
+data_path = 'C:/Users/gram/Desktop/Temp/Python project/소상공인시장진흥공단_상가(상권)정보_경기_202209.csv'
+city_list = []
+industry_list = []
+
+# 콘솔 편집
+os.system("mode con cols=200 lines=50")
+
+# PRINT FIGLET
+f = Figlet(font='slant')
+print (f.renderText('Python Project'))
+
+
+# Using tqdm module for pandas, Load file
+print("Loading File from " + data_path)
+tqdm.pandas()
+df = pd.concat([chunk for chunk in tqdm(pd.read_csv(data_path, chunksize=10000), unit=" 항목", desc="파일을 불러오는 중")])
+row, column = df.shape
+print("\n\n" + str(row) + "행 " + str(column) + "열 의 데이터를 불러왔습니다.")
+df.head()
+
+time.sleep(0.5)
+os.system("cls")
+
+print("\n\n시군구명 업데이트 중..\n")
+tem = list(set(df['시군구명'].tolist()))
+index = 0
+for city in tqdm(tem, unit="개"):
+    if not city_list or city > city_list[-1]:
+        city_list.append(city)
+    else:
+        while city > city_list[index] and len(city_list):
+            index += 1
+        city_list.insert(index, city)
+print("\n")
+for city in city_list:
+    print("-", city)
+time.sleep(0.5)
+
+print("\n\n업종 종류 업데이트 중..\n")
+tem = list(set(df['상권업종대분류명'].tolist()))
+index = 0
+for industry in tqdm(tem, unit="개"):
+    if not industry_list or industry > industry_list[-1]:
+        industry_list.append(industry)
+    else:
+        while industry > industry_list[index] and len(industry_list):
+            index += 1
+        industry_list.insert(index, industry)
+print("\n")
+for industry in industry_list:
+    print("-", industry)
+time.sleep(0.5)
+
+os.system("cls")
+
+print("< 지역 상권 분석 프로그램 >\n\n")
+
+def arrowOption(arr, title):
+    _arr = [' '.join(list(v)) for v in arr]
+    _title = " ".join(list(title)).strip()
+    option, index = pick.pick(_arr, _title, indicator='>', default_index=0)
+    return option, index
+
+# # # # # SCREEN # # # # #
+# 메인 스크린
+def Main():
+    opt, idx = arrowOption(["업종별 지역 순위\n", "지역별 업종 순위\n", "나가기", "기록보기"], "< 옵션 선택 >")
+    option(idx)
+
+# 이전 기록
+def prevResult():
     print("[Enter] 키를 눌러 옵션으로 이동", end="")
     re = input()
     if re != 'q':
@@ -135,16 +131,6 @@ def realMain():
     print('프로그램을 종료합니다.')
     exit()
 
-# 메인 스크린
-def Main():
-    opt, idx = arrowOption(["업종별 지역 순위\n", "지역별 업종 순위\n", "나가기", "기록보기"], "< 옵션 선택 >")
-    option(idx)
-
-def arrowOption(arr, title):
-    _arr = [' '.join(list(v)) for v in arr]
-    _title = " ".join(list(title)).strip()
-    option, index = pick.pick(_arr, _title, indicator='>', default_index=0)
-    return option, index
 
 def option(num):
     if num==0:
@@ -155,11 +141,12 @@ def option(num):
         print('프로그램을 종료합니다.')
         exit()
     elif num==3:
-        realMain()
+        prevResult()
     else:
         print("\n잘못된 입력입니다.")
         time.sleep(2)
         Main()
+
 
 def showCircleGraph(columns, column1, column2, re_row1, re_row2, title, options):
     list = []
@@ -205,10 +192,11 @@ def showCircleGraph(columns, column1, column2, re_row1, re_row2, title, options)
     plt.title(title)
     plt.show()
 
+# # # # # FEATUER # # # # #
+
 # 지역별 업종 순위 입력
 def print_Industry_ranking():
-    option = ["직접입력", "선택", "뒤로가기"]
-    option, index = arrowOption(option, "지역별 업종 순위")
+    option, index = arrowOption(["직접입력", "선택", "뒤로가기"], "지역별 업종 순위")
     city = ""
     if index == 0:
         city = input("확인하고자 하는 지역을 입력하세요: ")
@@ -231,18 +219,9 @@ def print_Industry_ranking():
         print("지역 \"" + city + "\" (이)가 존재하지 않습니다. 다시 입력하세요.")
         print_Industry_ranking()
 
-# 지역별 업종 순위 데이터
-def Industry_ranking(city):
-    if city == None:
-        showCircleGraph("시군구명", city, "상권업종대분류명", "업종", "업종수", city, True)
-    else:
-        showCircleGraph("시군구명", city, "상권업종대분류명", "업종", "업종수", city, False)
-    print_Industry_ranking()
-
 # 업종별 지역 순위 입력
 def print_area_ranking_by_Industry():
-    option = ["직접입력", "선택", "뒤로가기"]
-    option, index = arrowOption(option, "업종별 지역 순위")
+    option, index = arrowOption(["직접입력", "선택", "뒤로가기"], "업종별 지역 순위")
     industry = ""
     if index == 0:
         industry = input("확인하고자 하는 업종을 입력하세요: ")
@@ -264,6 +243,17 @@ def print_area_ranking_by_Industry():
     else:
         print("업종 \"" + industry + "\" (이)가 존재하지 않습니다. 다시 입력하세요.")
         print_Industry_ranking()
+
+
+# # # # # ALGORITHM # # # # #
+
+# 지역별 업종 순위 데이터
+def Industry_ranking(city):
+    if city == None:
+        showCircleGraph("시군구명", city, "상권업종대분류명", "업종", "업종수", city, True)
+    else:
+        showCircleGraph("시군구명", city, "상권업종대분류명", "업종", "업종수", city, False)
+    print_Industry_ranking()
 
 
 # 업종별 지역 순위 데이터
